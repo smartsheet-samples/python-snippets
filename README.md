@@ -1,2 +1,2 @@
 # python-snippets
-Small example functions
+Small example functions coming soon
