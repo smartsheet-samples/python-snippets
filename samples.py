@@ -5,6 +5,57 @@ import logging
 # TODO: Set your API access token here, or leave as None and set as environment variable "SMARTSHEET_ACCESS_TOKEN"
 access_token = None
 
+# Download an image in a cell
+def download_cell_image(client, sheet_id, row_id, column_id, default_filename):
+    # Get desired row
+    row = client.Sheets.get_row(sheet_id, row_id)
+    cell = row.get_column(column_id)
+    image = cell.image
+
+    filename = getattr(image, 'alt_text', default_filename)
+
+    # Obtain a temporary image URL
+    imageUrl = ss_client.models.ImageUrl( { "imageId": image.id } ) 
+    response = ss_client.Images.get_image_urls([imageUrl])
+    url = response.image_urls[0].url
+
+   # Download the image
+    import requests
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+
+# Set column definition to a list of contacts
+def add_column_contacts(ss_client, sheet_id, column_id, emails):
+
+    #
+    # sheet = ss_client.Sheets.get_sheet(sheet_id)
+    # existing_column = next(c for c in sheet.columns if c.id == column_id)
+    #
+    # options = existing_column.contact_options
+    #
+    # for email in emails:
+    #     if not(next((o for o in options if o.email == email), None)):
+    #         xxx = ss_client.models.contact_option.ContactOption()
+    #         x = 5
+
+
+
+
+    column = ss_client.models.Column()
+    column.type = 'CONTACT_LIST'
+
+    contacts = []
+
+    for email in emails:
+        contact_option = ss_client.models.contact_option.ContactOption()
+        contact_option.email = email
+        contacts.append(contact_option)
+
+    column.contact_options = contacts
+    ss_client.Sheets.update_column(sheet_id, column_id, column)
+    return None
 
 # Set sheet link
 # Value from source will be visible in dest
@@ -37,9 +88,21 @@ ss_client = smartsheet.Smartsheet(access_token)
 ss_client.errors_as_exceptions(True)
 
 # setup logging
-logging.basicConfig(filename='samples.log', level=logging.INFO)
+logging.basicConfig(filename='samples.log', level=logging.DEBUG)
 
 # Add your test calls here
-# set_sheet_link(ss_client, 6903887367038852, 6144655761926020, 7262773366286212, 5670346721388420, 3626203910301572, 5759377954105220)
+sheet_id = 5370997298751364
+row_id = 6483985534609284
+column_id = 2009176927954820
+
+sheet_id2 = 6903887367038852
+row_id2 = 6144655761926020
+column_id2 = 7262773366286212
+
+download_cell_image(ss_client, sheet_id, row_id, column_id, "save.jpg")
+
+# add_column_contacts(ss_client, sheet_id, column_id, ['foo@bar.com'])
+
+# set_sheet_link(ss_client, sheet_id2, row_id2, column_id2, sheet_id, row_id, column_id)
 
 print('Done')
