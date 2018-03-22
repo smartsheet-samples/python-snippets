@@ -28,21 +28,6 @@ def download_cell_image(client, sheet_id, row_id, column_id, default_filename):
 
 # Set column definition to a list of contacts
 def add_column_contacts(ss_client, sheet_id, column_id, emails):
-
-    #
-    # sheet = ss_client.Sheets.get_sheet(sheet_id)
-    # existing_column = next(c for c in sheet.columns if c.id == column_id)
-    #
-    # options = existing_column.contact_options
-    #
-    # for email in emails:
-    #     if not(next((o for o in options if o.email == email), None)):
-    #         xxx = ss_client.models.contact_option.ContactOption()
-    #         x = 5
-
-
-
-
     column = ss_client.models.Column()
     column.type = 'CONTACT_LIST'
 
